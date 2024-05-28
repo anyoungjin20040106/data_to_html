@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MYSQL to HTML</title>
+</head>
+
+<body>
+    <form action="/sql" method="post" onsubmit="return queryCheck()">
+        <table align="center" border="1">
+            <tr>
+                <td colspan="4" align="center">
+                    <h1>MySQL to HTML</h1>
+                </td>
+            </tr>
+            <tr>
+                <td>호스트(host)</td>
+                <td><input name="host" value="127.0.0.1" required></td>
+                <td>db명(database)</td>
+                <td><input name="database" value="mysql" required></td>
+            </tr>
+            <tr>
+                <td>유저명(user)</td>
+                <td><input name="user" width="100%" value="root" required></td>
+                <td>암호(password)</td>
+                <td><input name="password" type="password" required></td>
+            </tr>
+            <tr>
+                <td>포트(port)</td>
+                <td><input width="100%" type="number" name="port" min="1024" max="65535" value="3306" required>
+                <td>쿼리(query)</td>
+                <td><input width="100%" name="query" required>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="4"><button style="width: 100%;" type="submit">제출(submit)</button></td>
+            </tr>
+        </table>
+    </form>
+</body>
+<script>
+    function queryCheck() {
+        var query = String(document.getElementsByName('query')[0].value).trim();
+        var pattern = "^select\\s+((\\w|_)+(,\\s*(\\w|_)+)*|\\*)\\s+from\\s+(\\w|_)+.*$";
+        var reg = new RegExp(pattern, "i");
+        var result = reg.test(query);
+        alert(result ? `HTML 코드로 바꾸겠습니다(start working table to html code)` : "쿼리는 select문만 가능합니다(query only supports SELECT)");
+        return result;
+    }
+</script>
+
+</html>

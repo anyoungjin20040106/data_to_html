@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>file to HTML</title>
+</head>
+<body>
+    <form action="/file" method="post" enctype="multipart/form-data" onsubmit="return filecheck ()">
+        <table align="center" border="1">
+            <tr>
+                <td colspan="2" align="center">
+                    <h1>file to HTML</h1>
+                </td>
+            </tr>
+            <tr>
+                <td>파일(file)</td>
+                <td><input type="file" name="file" required></td>
+                </tr>
+            <tr>
+                <td colspan="4"><button style="width: 100%;" type="submit">제출(submit)</button></td>
+            </tr>
+        </table>
+    </form>
+    
+</body>
+<script>
+    function filecheck(){
+        var filearr=String(document.getElementsByName('sheet')[0].value).split(".");
+        var extension=String(filearr[filearr.length-1]).toLocaleLowerCase();
+        var excelExtensions = ["xls", "xlsx", "xlsm", "xlsb", "xlt", "xltx", "xltm", "csv","tsv"];
+        var result=excelExtensions.includes(extension);
+        alert(result?"HTML 코드로 바꾸겠습니다(start warking file to html)":`파일 확장자는 ${excelExtensions.join(", ")}만 가능합니다.(file only supports ${excelExtensions.join(", ")})`)
+        return result;
+    }
+</script>
+</html>

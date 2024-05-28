@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="/js/index.js" defer></script>
+    <title>{{title}}</title>
+</head>
+
+<body>
+    <h2>미리보기</h2>
+    {{table | safe}}<br>
+    <h2>코드</h2>
+    <textarea readonly id="code" rows="{{rows}}" style="width: 100%;">{{table}}</textarea>
+    <button type="button" onclick="copy()" >코드 복사하기(copy code)</button>
+    <button type="button" onclick="Move('{{herf}}')" >다른 {{kind}}로 해보기(try other {{enkind}})</button>
+</body>
+<script>
+    function copy() {
+        document.getElementById("code").select();
+        document.execCommand("copy");
+        alert('성공(success)')
+    }
+</script>
+
+</html>

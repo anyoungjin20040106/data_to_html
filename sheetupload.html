@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <form action="/sheet" method="post">
+        <table align="center" border="1">
+            <tr>
+                <td colspan="2" align="center">
+                    <h1>sheet to html</h1>
+                </td>
+            </tr>
+            <tr>
+                <td >google sheet URL</td>
+                <td><input type="url" required name="url" width="100%" placeholder="구글 시트의 URL을 입력하세요(input google shhet url)"></td>
+            </tr>
+            <tr>
+                <td colspan="2"><button type="button" onclick="document.getElementById('popup').showModal()" style="width: 100%;">주의사항</button></td>
+            </tr>
+            <tr>
+                <td colspan="2"><button style="width: 100%;" type="submit">제출(submit)</button></td>
+            </tr>
+        </table>
+    </form>
+    
+
+    <dialog id="popup">
+        <p>구글 시트 링크만 가능하고 해당 구글 시트가 공개 상태여야합니다<br>(url only support google sheet url and this state public state)</p>
+        <form method="dialog">
+            <button>닫기(close)</button>
+        </form>
+    </dialog>
+</body>
+
+</html>
