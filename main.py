@@ -5,6 +5,7 @@ from SQLConn import MYSQLConn
 import re
 from io import StringIO,BytesIO
 import pandas as pd
+import html
 from fastapi.templating import Jinja2Templates
 app=FastAPI()
 app.mount("/img",StaticFiles(directory="img"))
@@ -39,11 +40,11 @@ def sql(request:Request,host:str=Form(...),database:str=Form(...),user:str=Form(
     try:#호스트나 유저명 db명, 포트, 비밀번호, db명이 다르면
         conn=MYSQLConn(host=host,user=user,database=database,password=password,port=port)
     except Exception as e:
-        return alert(request,f'DB정보를 다시 확인해주세요(check DB info):{e}')
+        return alert(request,f'DB정보를 다시 확인해주세요(check DB info):{html.unescape(e)}')
     try:#명령어가 잘못되면?
         df=conn.to_DataFrame(query)
     except Exception as e:
-        return alert(request,f'쿼리를 다시 확인해주세요 (check query): {e}')
+        return alert(request,f'쿼리를 다시 확인해주세요 (check query): {html.unescape(e)}')
     pattern = r"^select\s+.*\s+from\s+(\w+)"
     title=re.search(pattern,query,re.IGNORECASE).group(1)
     code=df.to_html(index=False,escape=False).replace(' class="dataframe"',"").replace(' style="text-align: right;"',"")
@@ -61,7 +62,7 @@ def api(host:str=Form(...),database:str=Form(...),user:str=Form(...),password:st
     code=df.to_html(index=False,escape=False).replace(' class="dataframe"',"").replace(' style="text-align: right;"',"")
     return code
 @app.post("/sheetapi")
-def sheet(request:Request,url:str=Form(...)):
+def sheet(url:str=Form(...)):
     id=url.split('/')[5]
     sheet_url = f"https://docs.google.com/spreadsheets/d/{id}/export?format=xlsx"
 
