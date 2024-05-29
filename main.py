@@ -44,6 +44,7 @@ def apidocs():
     return HTMLResponse(html_content)
 @app.post("/sql")
 def sql(request:Request,host:str=Form(...),database:str=Form(...),user:str=Form(...),password:str=Form(...),query:str=Form(...),port:int=Form(...)):
+    query=query.lower().replace('select*','select *')
     try:#호스트나 유저명 db명, 포트, 비밀번호, db명이 다르면
         conn=MYSQLConn(host=host,user=user,database=database,password=password,port=port)
     except Exception as e:
