@@ -1,5 +1,5 @@
 from fastapi import FastAPI,Form,Request,HTTPException,UploadFile,File
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse,JSONResponse,HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from SQLConn import MYSQLConn
 import re
@@ -7,6 +7,7 @@ from io import StringIO,BytesIO
 import pandas as pd
 import html
 from fastapi.templating import Jinja2Templates
+import markdown
 app=FastAPI()
 app.mount("/img",StaticFiles(directory="img"))
 app.mount("/js",StaticFiles(directory="js"))
@@ -35,6 +36,12 @@ def sheetupload():
 @app.get("/sheetupload")
 def sheetupload():
     return FileResponse('sheetupload.html')
+@app.get("/apidocs")
+def apidocs():
+    with open("README.md", "r", encoding="utf-8") as f:
+        readme_content = f.read()
+    html_content = markdown.markdown(readme_content)
+    return HTMLResponse(html_content)
 @app.post("/sql")
 def sql(request:Request,host:str=Form(...),database:str=Form(...),user:str=Form(...),password:str=Form(...),query:str=Form(...),port:int=Form(...)):
     try:#호스트나 유저명 db명, 포트, 비밀번호, db명이 다르면
@@ -51,6 +58,8 @@ def sql(request:Request,host:str=Form(...),database:str=Form(...),user:str=Form(
     return view(request,title,code,"DB")
 @app.post("/sqlapi")
 def api(host:str=Form(...),database:str=Form(...),user:str=Form(...),password:str=Form(...),query:str=Form(...),port:int=Form(...)):
+    if not query.lower().startswith('select'):
+        raise HTTPException(detail=f'쿼리문은 오직 select문만 가능합니다.(qurey support only "select")',status_code=400)
     try:
         conn=MYSQLConn(host=host,user=user,database=database,password=password,port=port)
     except Exception as e:
@@ -60,20 +69,22 @@ def api(host:str=Form(...),database:str=Form(...),user:str=Form(...),password:st
     except Exception as e:
         raise HTTPException(detail=f'쿼리를 다시 확인해주세요 (check query): {e}',status_code=400)
     code=df.to_html(index=False,escape=False).replace(' class="dataframe"',"").replace(' style="text-align: right;"',"")
-    return code
+    return JSONResponse(content={'table':code},status_code=200)
 @app.post("/sheetapi")
 def sheet(url:str=Form(...)):
-    id=url.split('/')[5]
+    paths=url.split('/')
+    idx=paths.index('d')+1
+    id=paths[idx]
     sheet_url = f"https://docs.google.com/spreadsheets/d/{id}/export?format=xlsx"
 
     response = requests.get(sheet_url)
     if response.status_code%400<100:
-        return alert(requests,"url을 확인해 주세요(check url)")
+        return HTTPException(requests,"url을 확인해 주세요(check url)")
     elif response.status_code%500<100:
-        return alert(requests,"서버에 문제가 생겼습니다(error server)")
+        return HTTPException(requests,"서버에 문제가 생겼습니다(error server)")
     df=pd.read_excel(BytesIO(response.content),engine='openpyxl')
     code = df.to_html(index=False, escape=False).replace(' class="dataframe"', "").replace(' style="text-align: right;"', "")
-    return code
+    return JSONResponse(content={'table':code},status_code=200)
 
 @app.post("/file")
 async def file(request:Request,file:UploadFile=File(...)):
@@ -94,10 +105,10 @@ def sheet(request:Request,url:str=Form(...)):
     sheet_url = f"https://docs.google.com/spreadsheets/d/{id}/export?format=xlsx"
 
     response = requests.get(sheet_url)
-    if response.status_code%400<100:
-        return alert(requests,"url을 확인해 주세요(check url)")
-    elif response.status_code%500<100:
-        return alert(requests,"서버에 문제가 생겼습니다(error server)")
+    if response.status_code >= 400 and response.status_code < 500:
+        raise HTTPException(status_code=400, detail="URL을 확인해 주세요 (check URL)")
+    elif response.status_code >= 500:
+        raise HTTPException(status_code=500, detail="서버에 문제가 생겼습니다 (server error)")
     df=pd.read_excel(BytesIO(response.content),engine='openpyxl')
     code = df.to_html(index=False, escape=False).replace(' class="dataframe"', "").replace(' style="text-align: right;"', "")
     return view(request,"시트결과",code,"시트","sheet","/sheetupload")

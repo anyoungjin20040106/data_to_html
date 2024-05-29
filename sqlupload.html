@@ -43,6 +43,7 @@
 <script>
     function queryCheck() {
         var query = String(document.getElementsByName('query')[0].value).trim();
+        query=query.replace('select*','select *');
         var pattern = "^select\\s+((\\w|_)+(,\\s*(\\w|_)+)*|\\*)\\s+from\\s+(\\w|_)+.*$";
         var reg = new RegExp(pattern, "i");
         var result = reg.test(query);
