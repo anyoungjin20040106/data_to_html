@@ -8,11 +8,12 @@ import pandas as pd
 import html
 from fastapi.templating import Jinja2Templates
 import markdown
+import requests
+
 app=FastAPI()
 app.mount("/img",StaticFiles(directory="img"))
 app.mount("/js",StaticFiles(directory="js"))
 templates = Jinja2Templates(directory="templates")
-import requests
 
 def alert(request:Request, msg:str):
     return templates.TemplateResponse("arlert.html", {"request": request, "msg": msg})
@@ -104,7 +105,6 @@ async def file(request:Request,file:UploadFile=File(...)):
 def sheet(request:Request,url:str=Form(...)):
     id=url.split('/')[5]
     sheet_url = f"https://docs.google.com/spreadsheets/d/{id}/export?format=xlsx"
-
     response = requests.get(sheet_url)
     if response.status_code >= 400 and response.status_code < 500:
         raise HTTPException(status_code=400, detail="URL을 확인해 주세요 (check URL)")
@@ -113,4 +113,3 @@ def sheet(request:Request,url:str=Form(...)):
     df=pd.read_excel(BytesIO(response.content),engine='openpyxl')
     code = df.to_html(index=False, escape=False).replace(' class="dataframe"', "").replace(' style="text-align: right;"', "")
     return view(request,"시트결과",code,"시트","sheet","/sheetupload")
-
